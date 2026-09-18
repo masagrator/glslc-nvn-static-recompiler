@@ -20,3 +20,18 @@ Naive in the sense that it generates tons of false functions that are never used
 Code was generated with Claude.
 
 GCC 15+ is a must. Clang will generate output incompatible with how musl functions work, older GCCs don't support `#embed`.
+
+# How to recompile glslc
+
+1. Convert NSO to ELF with f.e. nx2elf
+2. Run:
+ - via Windows: 
+ ```pwsh
+ ./QUICKSTART-win.ps1 file.elf 0x7100000000 [-j n]
+ ```
+ - via Linux:
+ ```bash
+ ./QUICKSTART.sh file.elf 0x7100000000 [-jn]
+ ```
+`-j n`/`-jn` - amount of threads to use in parts that allow it, by default `n` is `2`
+Depending on size of ELF this can take even an hour to finish.
