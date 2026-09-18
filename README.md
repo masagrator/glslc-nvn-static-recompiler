@@ -19,7 +19,7 @@ Naive in the sense that it generates tons of false functions that are never used
 
 Code was generated with Claude.
 
-GCC 15+ is a must. Clang will generate output incompatible with how musl functions work, older GCCs don't support `#embed`.
+GCC 15+ is a must. Clang will generate output incompatible with how musl functions work, older GCCs don't support `#embed`.<br>
 Python 3 is also required.
 
 # How to recompile glslc
