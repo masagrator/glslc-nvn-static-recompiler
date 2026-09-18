@@ -37,4 +37,4 @@ Python 3 is also required.
 `-j n`/`-jn` - amount of threads to use in parts that allow it, by default `n` is `2`.<br>
 Depending on size of ELF and amount of threads this can take even an hour to finish.
 
-Result of this work is a folder with source code ready to compile via make.
+Result of this work is a folder with source code ready to compile via make with additional file `glslc_cli.c` for CLI interface added on top of library.
