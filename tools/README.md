@@ -13,7 +13,7 @@ is how the two are compared byte for byte (see [Comparing](#comparing-against-th
 
 ## Building
 
-    gcc -Iout/include -O1 -std=c11 -mavx2 -c tools/glslc_cli.c -o glslc_cli.o
+    gcc -Iout/include -O1 -std=c11 -march=x86-64-v3 -c tools/glslc_cli.c -o glslc_cli.o
     gcc -O1 -no-pie -rdynamic -o glslc_cli glslc_cli.o out/build/libguest.a \
         -lpthread -lm
 
