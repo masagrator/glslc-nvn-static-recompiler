@@ -1,0 +1,40 @@
+# elf2c — Python dependencies
+#
+# Install with:
+#     pip install -r requirements.txt --break-system-packages
+#
+#
+#   * cle:      segment/section objects, `mo.relocs` with rebased addresses,
+#               `mo.plt` / `mo.reverse_plt`, `loader.memory.load`
+#   * archinfo: the VEX guest-state register offsets (x0 at 16, sp at 264,
+#               q0 at 320).  The generated C hard-codes these, so a layout
+#               change would silently produce wrong code -- regenerate rather
+#               than mixing an old tree with a new archinfo.
+#   * pyvex:    IRSB structure, statement/expression classes, jumpkinds
+#   * angr:     CFGFast options used by analyze.py, and
+#               engines/vex/claripy/ccall.py, which was the reference for the
+#               AArch64 condition-code helpers in runtime/guest_rt.c
+#
+# If you upgrade, re-run the differential test afterwards -- it is the cheapest
+# way to catch a semantic drift:
+#
+#     gcc -Iruntime -Iout/include -O1 -std=c11 -o /tmp/cctest \
+#         runtime/cctest.c runtime/guest_rt.c -lm
+#     python3 ccref.py /tmp/cctest        # expect: 74880 cases, 0 mismatches
+# everything needed above is covered by installing just angr
+angr>=9.3.3
+keystone-engine>=0.9.2
+
+# Disassembly, used only for the comments in the generated C and for the
+# jump-table / false-start scanners.  Any recent 5.x works.
+capstone>=5.0.9
+
+# Not imported by the tool itself: angr/cle cover ELF parsing.  Kept because it
+# is the quickest way to inspect an input by hand (readelf-equivalent in
+# Python) when something looks wrong.
+pyelftools>=0.33
+
+# Profiler.  Not needed to run the tool, but it is how every generator
+# performance problem so far was located -- `py-spy dump --pid N` names the hot
+# frame in one call.  See HANDOVER.md section 6.
+py-spy>=0.4.2
