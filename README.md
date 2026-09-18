@@ -33,5 +33,5 @@ GCC 15+ is a must. Clang will generate output incompatible with how musl functio
  ```bash
  ./QUICKSTART.sh file.elf 0x7100000000 [-jn]
  ```
-`-j n`/`-jn` - amount of threads to use in parts that allow it, by default `n` is `2`
-Depending on size of ELF this can take even an hour to finish.
+`-j n`/`-jn` - amount of threads to use in parts that allow it, by default `n` is `2`.<br>
+Depending on size of ELF and amount of threads this can take even an hour to finish.
