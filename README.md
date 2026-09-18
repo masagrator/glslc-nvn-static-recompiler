@@ -15,4 +15,4 @@ Naive static recompiler of glslc included with some Nintendo Switch games. It wa
 | 17.24 | 102 | 1.16 | The Legend of Zelda: Echoes of Wisdom 1.0.0<br>Beyond Good & Evil 1.0.0-1.0.1 | subsdk0 |
 | 17.24 | 113 | 1.16 | Tomb Raider Definitive Edition 1.0.3 | subsdk0 |
 
-Naive in the sense that it generates tons of bloat that is never used which can generate executable size even 6x bigger than ELF. But it's still faster than running this elf through Unicorn via Python.
+Naive in the sense that it generates tons of functions that are never used which can generate executable size even 6x bigger than ELF. But it's still faster than running this elf through Unicorn via Python.
