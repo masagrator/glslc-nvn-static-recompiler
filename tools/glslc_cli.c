@@ -354,6 +354,7 @@ typedef struct {
     GLSLCoptionFlags flags;
     set_flags_t set;
     const char *force_include;
+    const char *spirv_entry;     /* --spirv-entry, default "main" */
     const char *const *include_paths; unsigned n_includes;
     const char *const *xfb_varyings;  unsigned n_xfb;
     const unsigned char *opt_reserved; int opt_reserved_set;
@@ -646,6 +647,7 @@ static void usage(const char *argv0) {
 "                                   =N caps the parallel jobs at N, never\n"
 "                                   above the number of cores\n"
 "  --language glsl|gles|spirv       --debug-info none|g0|g1|g2\n"
+"  --spirv-entry <name>             SPIR-V entry point (default main)\n"
 "  --spill-control default|no-spill --opt-level default|none\n"
 "  --unroll-control default|none|all\n"
 "  --warn-uninit default|none|all\n"
@@ -729,15 +731,35 @@ static int compile_and_dump(const opts_t *o, input_t *inputs, unsigned n_inputs)
             n_inputs, MAX_PROGRAM_INPUTS);
     const char   *sources[MAX_PROGRAM_INPUTS];
     NVNshaderStage stages[MAX_PROGRAM_INPUTS];
+    /* SPIR-V input: the library needs every module's size in bytes, its entry
+     * point name and a (possibly null) specialization table per module; with
+     * those three arrays left null it dereferences a null pointer. */
+    uint32_t spv_sizes[MAX_PROGRAM_INPUTS];
+    const char *spv_entries[MAX_PROGRAM_INPUTS];
+    const GLSLCspirvSpecializationInfo *spv_spec[MAX_PROGRAM_INPUTS];
+    const int is_spirv = obj.options.optionFlags.language == GLSLC_LANGUAGE_SPIRV;
     for (unsigned i = 0; i < n_inputs; ++i) {
         inputs[i].text = read_file(inputs[i].path);
         sources[i] = inputs[i].text;
         stages[i]  = inputs[i].stage;
+        if (is_spirv) {
+            struct stat sb;
+            if (stat(inputs[i].path, &sb)) die("cannot stat %s", inputs[i].path);
+            if (sb.st_size % 4) die("%s: SPIR-V size is not a multiple of 4", inputs[i].path);
+            spv_sizes[i]   = (uint32_t)sb.st_size;
+            spv_entries[i] = o->spirv_entry ? o->spirv_entry : "main";
+            spv_spec[i]    = NULL;
+        }
         printf("  in  %-50s %s\n", inputs[i].path, stage_name(inputs[i].stage));
     }
     obj.input.sources = sources;
     obj.input.stages  = stages;
     obj.input.count   = (uint8_t)n_inputs;
+    if (is_spirv) {
+        obj.input.spirvModuleSizes     = spv_sizes;
+        obj.input.spirvEntryPointNames = spv_entries;
+        obj.input.spirvSpecInfo        = spv_spec;
+    }
 
     uint8_t ok = glslcCompile(&obj);
 
@@ -910,6 +932,7 @@ int main(int argc, char **argv) {
     const char *include_paths[64]; unsigned n_includes = 0;
     const char *xfb_varyings[64];  unsigned n_xfb = 0;
     const char *force_include = NULL;
+    const char *spirv_entry = NULL;
     unsigned char opt_reserved[32];
     int opt_reserved_set = 0;
     memset(opt_reserved, 0, sizeof opt_reserved);
@@ -1021,6 +1044,7 @@ int main(int argc, char **argv) {
             epicsh = (int)m;
         }
         else if (IS("--force-include-std-header")) force_include = NEXT();
+        else if (IS("--spirv-entry")) spirv_entry = NEXT();
         else if (IS("--include-path")) {
             if (n_includes == 64) die("too many --include-path");
             include_paths[n_includes++] = NEXT();
@@ -1140,6 +1164,7 @@ int main(int argc, char **argv) {
     o.flags = flags;
     o.set = set;
     o.force_include = force_include;
+    o.spirv_entry = spirv_entry;
     o.include_paths = include_paths; o.n_includes = n_includes;
     o.xfb_varyings = xfb_varyings;   o.n_xfb = n_xfb;
     o.opt_reserved = opt_reserved;   o.opt_reserved_set = opt_reserved_set;
